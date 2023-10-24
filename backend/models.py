@@ -5,6 +5,7 @@ from pydantic.json_schema import JsonSchemaValue
 from pydantic.functional_validators import AfterValidator
 from typing import Optional, Annotated, Any, Callable
 
+
 # new uptodate pydantic-v2 way of validating mongoDB ObjectId
 class ObjectIdPydanticAnnotation:
     @classmethod
@@ -19,28 +20,28 @@ class ObjectIdPydanticAnnotation:
             raise ValueError("Invalid ObjectId")
 
     @classmethod
-    def __get_pydantic_core_schema__(cls, source_type, _handler) -> core_schema.CoreSchema:
+    def __get_pydantic_core_schema__(
+        cls, source_type, _handler
+    ) -> core_schema.CoreSchema:
         assert source_type is ObjectId
         return core_schema.no_info_wrap_validator_function(
-            cls.validate_object_id, 
-            core_schema.str_schema(), 
+            cls.validate_object_id,
+            core_schema.str_schema(),
             serialization=core_schema.to_string_ser_schema(),
         )
 
     @classmethod
     def __get_pydantic_json_schema__(cls, _core_schema, handler) -> JsonSchemaValue:
         return handler(core_schema.str_schema())
-    
+
 
 class MongoBaseModel(BaseModel):
-    id: Annotated[ObjectId, ObjectIdPydanticAnnotation] = Field(default_factory=ObjectId, alias="_id")
+    id: Annotated[ObjectId, ObjectIdPydanticAnnotation] = Field(
+        default_factory=ObjectId, alias="_id"
+    )
 
     class Config:
         json_encoders = {ObjectId: str}
-
-
-entry = MongoBaseModel()
-print(entry.id)
 
 
 class CarBase(MongoBaseModel):
@@ -52,7 +53,7 @@ class CarBase(MongoBaseModel):
     cm3: int = Field(...)
 
 
-class CarUpdate(MongoBaseModel):
+class CarUpdate(BaseModel):
     price: Optional[int] = None
 
 
@@ -60,10 +61,7 @@ class CarDB(CarBase):
     pass
 
 
-
-
 # from typing_extensions import Annotated
-# from pydantic import BaseModel 
-# from pydantic.functional_validators import AfterValidator 
-# from bson import ObjectId as _ObjectId 
-
+# from pydantic import BaseModel
+# from pydantic.functional_validators import AfterValidator
+# from bson import ObjectId as _ObjectId

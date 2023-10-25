@@ -1,12 +1,12 @@
 import React from 'react'
 import Layout from '../components/Layout'
 
-const NewCar = () => {
+const About = () => {
   return (
     <Layout>
-      <div>NewCar</div>
+        <div>About</div>
     </Layout>
   )
 }
 
-export default NewCar
+export default About

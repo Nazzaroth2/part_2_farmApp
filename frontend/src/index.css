@@ -4,7 +4,11 @@
 
 
 @layer utilities{
-    .active-link{
-        @apply bg-yellow-500 p-4 shadow-md text-white
+    .active-link {
+        @apply m-2 p-2 bg-contrast shadow-md text-white;
+    }
+
+    .inactive-link {
+        @apply m-2 p-4 hover:bg-contrast hover:text-white hover:shadow-md
     }
 }

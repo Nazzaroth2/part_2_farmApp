@@ -74,7 +74,7 @@ const Car = () => {
 
     useEffect(() => {
         getCar();
-    }, []);
+    });
 
     return (
         <Layout>

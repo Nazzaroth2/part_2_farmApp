@@ -2,13 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .active-link {
+    @apply m-2 p-2 bg-contrast shadow-md text-white;
+  }
 
-@layer utilities{
-    .active-link {
-        @apply m-2 p-2 bg-contrast shadow-md text-white;
-    }
-
-    .inactive-link {
-        @apply m-2 p-4 hover:bg-contrast hover:text-white hover:shadow-md
-    }
+  .inactive-link {
+    @apply m-2 p-4 hover:bg-contrast hover:text-white hover:shadow-md;
+  }
 }

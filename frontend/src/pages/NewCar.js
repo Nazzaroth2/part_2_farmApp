@@ -1,12 +1,12 @@
-import React from 'react'
-import Layout from '../components/Layout'
+import React from 'react';
+import Layout from '../components/Layout';
 
 const NewCar = () => {
   return (
     <Layout>
       <div>NewCar</div>
     </Layout>
-  )
-}
+  );
+};
 
-export default NewCar
+export default NewCar;

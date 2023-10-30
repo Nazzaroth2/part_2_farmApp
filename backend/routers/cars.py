@@ -1,16 +1,20 @@
-from fastapi import APIRouter, Request, Body, status, HTTPException
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse, Response
 from typing import Optional, List
 
-from models.cars import CarBase, CarUpdate
+from fastapi import APIRouter, Request, Body, status, HTTPException, Depends
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse, Response
+
+from models.cars import CarBase, CarUpdate, CarDB
+from authentication import Authorization
 
 router = APIRouter()
+auth_handler = Authorization()
 
 
 @router.get("/", response_description="List all cars")
 async def list_all_cars(
     request: Request,
+    userId: Depends(auth_handler.auth_wrapper),
     min_price: int = 0,
     max_price: int = 100000,
     brand: Optional[str] = None,
@@ -24,7 +28,7 @@ async def list_all_cars(
         query["brand"] = brand
 
     full_query = (
-        request.app.mongodb["cars1"]
+        request.app.mongodb["cars2"]
         .find(query)
         .sort("_id", 1)
         .skip(skip)
@@ -36,11 +40,12 @@ async def list_all_cars(
 
 
 @router.post("/", response_description="Add new car")
-async def create_car(request: Request, car: CarBase = Body(...)):
+async def create_car(request: Request, car: CarBase = Body(...), userId=Depends(auth_handler.auth_wrapper)):
     car = jsonable_encoder(car)
+    car["owner"] = userId
 
-    new_car = await request.app.mongodb["cars1"].insert_one(car)
-    created_car = await request.app.mongodb["cars1"].find_one(
+    new_car = await request.app.mongodb["cars2"].insert_one(car)
+    created_car = await request.app.mongodb["cars2"].find_one(
         {"_id": new_car.inserted_id}
     )
 
@@ -58,13 +63,18 @@ async def show_car(id: str, request: Request):
 
 
 @router.patch("/{id}", response_description="Update a car")
-async def update_car(id: str, request: Request, car: CarUpdate = Body(...)):
-    # await request.app.mongodb['cars1'].update_one({'_id':id}, {'$set': car.model_dump(exclude_unset=True)})
-    await request.app.mongodb["cars1"].update_one(
+async def update_car(id: str, request: Request, car: CarUpdate = Body(...), userId = Depends(auth_handler.auth_wrapper)):
+    user = await request.app.mongodb["users"].find_one({"_id": userId})
+    findCar = await request.app.mongodb["cars"].find_one({"_id": id})
+
+    if (findCar["owner"] != userId) and user["role"] != "ADMIN":
+        raise HTTPException(status_code=401, detail="Only the owner or an admin can update the car")
+    
+    await request.app.mongodb["cars2"].update_one(
         {"_id": id}, {"$set": car.model_dump()}
     )
 
-    if (car := await request.app.mongodb["cars1"].find_one({"_id": id})) is not None:
+    if (car := await request.app.mongodb["cars2"].find_one({"_id": id})) is not None:
         return CarBase(**car)
 
     raise HTTPException(status_code=404, detail=f"Car with id: {id} was not found.")

@@ -1,9 +1,9 @@
 from bson import ObjectId
-from pydantic import BaseModel, Field, ConfigDict, GetJsonSchemaHandler
+from pydantic import BaseModel, Field, EmailStr
 from pydantic_core import core_schema
 from pydantic.json_schema import JsonSchemaValue
-from pydantic.functional_validators import AfterValidator
-from typing import Optional, Annotated, Any, Callable
+from typing import Optional, Annotated, Any
+from email_validator import validate_email, EmailNotValidError
 
 
 # new uptodate pydantic-v2 way of validating mongoDB ObjectId
@@ -42,26 +42,3 @@ class MongoBaseModel(BaseModel):
 
     class Config:
         json_encoders = {ObjectId: str}
-
-
-class CarBase(MongoBaseModel):
-    brand: str = Field(..., min_length=3)
-    make: str = Field(..., min_length=3)
-    year: int = Field(...)
-    price: int = Field(...)
-    km: int = Field(...)
-    cm3: int = Field(...)
-
-
-class CarUpdate(BaseModel):
-    price: Optional[int] = None
-
-
-class CarDB(CarBase):
-    pass
-
-
-# from typing_extensions import Annotated
-# from pydantic import BaseModel
-# from pydantic.functional_validators import AfterValidator
-# from bson import ObjectId as _ObjectId

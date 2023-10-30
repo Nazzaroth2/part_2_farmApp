@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 from typing import Optional, List
 
-from models import CarBase, CarUpdate
+from models.cars import CarBase, CarUpdate
 
 router = APIRouter()
 
